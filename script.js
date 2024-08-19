@@ -28,9 +28,9 @@ function displayMovies(movies) {
         movieItem.innerHTML = `
             <img src="${movie.poster_path ? IMAGE_BASE_URL + movie.poster_path : 'placeholder.jpg'}" 
                  alt="${movie.title} poster" 
-                 title="${movie.title} (${movie.release_date.split('-')[0]})"
-                 onclick="rateMovie(${movie.id}, '${movie.title}')">
+                 title="${movie.title} (${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'})">
         `;
+        movieItem.addEventListener('click', () => rateMovie(movie.id, movie.title));
         movieList.appendChild(movieItem);
     });
 }
