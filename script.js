@@ -35,19 +35,20 @@ function displayMovies(movies) {
 function rateMovie(movieId, title) {
     const rating = prompt(`¿Qué calificación le das a ${title}? (1-10)`);
     if (rating && rating >= 1 && rating <= 10) {
-        fetch(`${BASE_URL}/movie/${movieId}?api_key=5bda5df823bd8aa847a7a80ae2a56f40`)
+        fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`)
             .then(response => response.json())
             .then(data => {
                 userRatings.push({
                     movieId,
                     title,
+                    year: data.release_date.split('-')[0], // Añadimos el año
                     rating: parseInt(rating),
                     genre: data.genres[0]?.name || 'Desconocido',
                     tmdbRating: parseFloat(data.vote_average)
                 });
-                saveRatings();  // Guardar en Local Storage
-                calculateStats(); // Recalcular estadísticas
-                displayRatedMovies(); // Mostrar películas valoradas
+                saveRatings();
+                calculateStats();
+                displayRatedMovies();
             });
     }
 }
@@ -107,16 +108,38 @@ function displayRatedMovies() {
     const ratedMoviesContainer = document.getElementById('rated-movies');
     ratedMoviesContainer.innerHTML = ''; // Limpiar el contenedor antes de agregar nuevas valoraciones
 
-    userRatings.forEach(rating => {
+    userRatings.forEach((rating, index) => {
         const movieItem = document.createElement('div');
         movieItem.className = 'movie-item';
         movieItem.innerHTML = `
-            <h3>${rating.title} - Tu valoración: ${rating.rating}/10</h3>
+            <h3>${rating.title} (${rating.year}) - Tu valoración: ${rating.rating}/10</h3>
             <p>Género: ${rating.genre}</p>
             <p>Calificación TMDb: ${rating.tmdbRating}/10</p>
+            <button onclick="editRating(${index})">Editar</button>
+            <button onclick="deleteRating(${index})">Eliminar</button>
         `;
         ratedMoviesContainer.appendChild(movieItem);
     });
+}
+
+function editRating(index) {
+    const rating = userRatings[index];
+    const newRating = prompt(`Editar calificación para ${rating.title} (1-10):`, rating.rating);
+    if (newRating && newRating >= 1 && newRating <= 10) {
+        userRatings[index].rating = parseInt(newRating);
+        saveRatings();
+        calculateStats();
+        displayRatedMovies();
+    }
+}
+
+function deleteRating(index) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta valoración?')) {
+        userRatings.splice(index, 1);
+        saveRatings();
+        calculateStats();
+        displayRatedMovies();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
