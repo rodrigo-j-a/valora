@@ -30,31 +30,67 @@ function displayMovies(movies) {
                  alt="${movie.title} poster" 
                  title="${movie.title} (${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'})">
         `;
-        movieItem.addEventListener('click', () => rateMovie(movie.id, movie.title));
+        movieItem.addEventListener('click', () => rateMovie(movie.id, movie.title, movie.poster_path));
         movieList.appendChild(movieItem);
     });
 }
 
-function rateMovie(movieId, title) {
-    const rating = prompt(`¿Qué calificación le das a ${title}? (1-10)`);
-    if (rating && rating >= 1 && rating <= 10) {
+function rateMovie(movieId, title, posterPath) {
+    // Crear el modal
+    const modal = document.createElement('div');
+    modal.className = 'rating-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div class="rating-content">
+                <h4>Valora</h4>
+                <img src="${posterPath ? IMAGE_BASE_URL + posterPath : 'placeholder.jpg'}" alt="${title} poster" class="movie-poster">
+                <h2>${title}</h2>
+                <input type="range" min="0" max="10" value="5" step="0.5" id="rating-slider">
+                <p>Tu valoración es de <span id="rating-value">5</span> / 10</p>
+                <button id="submit-rating">Enviar</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Actualizar el valor mostrado cuando se mueve el slider
+    const slider = document.getElementById('rating-slider');
+    const ratingValue = document.getElementById('rating-value');
+    slider.addEventListener('input', () => {
+        ratingValue.textContent = slider.value;
+    });
+
+    // Manejar el envío de la valoración
+    document.getElementById('submit-rating').addEventListener('click', () => {
+        const rating = parseFloat(slider.value);
         fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`)
             .then(response => response.json())
             .then(data => {
                 userRatings.push({
                     movieId,
                     title,
-                    year: data.release_date.split('-')[0], // Añadimos el año
-                    rating: parseInt(rating),
-                    genre: data.genres[0]?.name || 'Desconocido',
-                    tmdbRating: parseFloat(data.vote_average),
-                    posterPath: data.poster_path // Añadimos el poster_path
+                    year: data.release_date ? data.release_date.split('-')[0] : 'N/A',
+                    rating: rating,
+                    genre: data.genres && data.genres.length > 0 ? data.genres[0].name : 'Desconocido',
+                    tmdbRating: data.vote_average ? parseFloat(data.vote_average) : 0,
+                    posterPath: data.poster_path
                 });
                 saveRatings();
                 calculateStats();
                 displayRatedMovies();
+                document.body.removeChild(modal);
+            })
+            .catch(error => {
+                console.error('Error al obtener datos de la película:', error);
+                alert('Hubo un error al enviar la valoración. Por favor, inténtalo de nuevo.');
             });
-    }
+    });
+
+    // Manejar el cierre del modal
+    document.querySelector('.close-btn').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
 }
 
 function calculateStats() {
@@ -118,9 +154,9 @@ function displayRatedMovies() {
         movieItem.innerHTML = `
             <img src="${rating.posterPath ? IMAGE_BASE_URL + rating.posterPath : 'placeholder.jpg'}" alt="${rating.title} poster">
             <div class="movie-item-content">
-                <h3>${rating.title} (${rating.year}) - Tu valoración: ${rating.rating}/10</h3>
-                <p>Género: ${rating.genre}</p>
-                <p>Calificación TMDb: ${rating.tmdbRating}/10</p>
+                <h2>${rating.title}</h2>
+                <p>Año: ${rating.year}<br>Género: ${rating.genre}<br>Calificación TMDb: ${rating.tmdbRating}/10</p>
+                <h3>Tu valoración: ${rating.rating}/10</h3>
                 <button onclick="editRating(${index})">Editar</button>
                 <button onclick="deleteRating(${index})">Eliminar</button>
             </div>
@@ -131,13 +167,42 @@ function displayRatedMovies() {
 
 function editRating(index) {
     const rating = userRatings[index];
-    const newRating = prompt(`Editar calificación para ${rating.title} (1-10):`, rating.rating);
-    if (newRating && newRating >= 1 && newRating <= 10) {
-        userRatings[index].rating = parseInt(newRating);
+    
+    // Crear el modal
+    const modal = document.createElement('div');
+    modal.className = 'rating-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Edita la valoración de ${rating.title}</h2>
+            <input type="range" min="0" max="10" value="${rating.rating}" step="0.5" id="rating-slider">
+            <p>Tu valoración ahora es <span id="rating-value">${rating.rating}</span></p>
+            <button id="submit-rating">Guardar</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Actualizar el valor mostrado cuando se mueve el slider
+    const slider = document.getElementById('rating-slider');
+    const ratingValue = document.getElementById('rating-value');
+    slider.addEventListener('input', () => {
+        ratingValue.textContent = slider.value;
+    });
+
+    // Manejar el envío de la valoración
+    document.getElementById('submit-rating').addEventListener('click', () => {
+        const newRating = parseFloat(slider.value);
+        userRatings[index].rating = newRating;
         saveRatings();
         calculateStats();
         displayRatedMovies();
-    }
+        document.body.removeChild(modal);
+    });
+
+    // Manejar el cierre del modal
+    document.querySelector('.close-btn').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
 }
 
 function deleteRating(index) {

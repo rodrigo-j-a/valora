@@ -14,10 +14,15 @@
     .movie-item {
         width: calc(50% - 10px);
     }
+    
+    #movie-list .movie-item {
+        width: calc(33.33% - 13.33px);
+    }
 }
 
 @media (max-width: 450px) {
-    .movie-item {
+    .movie-item,
+    #movie-list .movie-item {
         width: 100%;
     }
 }
@@ -37,12 +42,17 @@ h1 {
 }
 
 h2 {
-    color: #e4e4e4;
+    color: #e2e2e2;
 }
 
 h3 {
     color: #dbdbdb;
 }
+
+h4 {
+    color: #808080;
+}
+
 
 button {
     margin: 10px;
@@ -89,8 +99,77 @@ button:hover {
     gap: 20px;
 }
 
+#rated-movies {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+}
+
 #rated-movies .movie-item {
     border: 1px solid #404040;
+    width: calc(33.33% - 13.33px); /* 3 películas por fila en pantallas grandes */
+    margin-bottom: 20px;
+    position: relative; /* Añadido */
+    padding-bottom: 80px; /* Aumentado para dar espacio a dos botones */
+    height: 350px; /* Aumentado de 300px a 350px */
+    overflow: hidden; /* Añadido: para contener la imagen */
+}
+
+#rated-movies .movie-item::before {
+    background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent); /* Aumentada la opacidad */
+}
+
+#rated-movies .movie-item img {
+    position: absolute; /* Añadido: posicionar la imagen absolutamente */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(5px); /* Añadido: efecto de desenfoque */
+}
+
+#rated-movies .movie-item-content {
+    position: absolute; /* Cambiado: posicionar el contenido absolutamente */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Cambiado: alinear el contenido en la parte inferior */
+    padding: 10px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent); /* Añadido: gradiente para mejorar la legibilidad */
+    color: #ffffff; /* Añadido: asegurar que el texto sea visible */
+    padding-bottom: 70px; /* Aumentado para dar espacio a los botones */
+}
+
+#rated-movies button {
+    z-index: 3;
+    position: absolute; /* Cambiado de relative a absolute */
+    bottom: 10px; /* Añadido */
+    width: calc(50% - 15px); /* Ancho ajustado para dos botones */
+    margin: 0 5px; /* Pequeño margen entre botones */
+}
+
+#rated-movies button:first-of-type {
+    left: 5px;
+    transform: none; /* Eliminamos la transformación */
+}
+
+#rated-movies button:last-of-type {
+    right: 5px;
+    left: auto; /* Aseguramos que no se aplique 'left' */
+    transform: none; /* Eliminamos la transformación */
+}
+
+@media (max-width: 600px) {
+    #rated-movies .movie-item {
+        width: 100%; /* 1 película por fila en pantallas pequeñas */
+        height: 400px; /* Añadido: altura mayor para pantallas pequeñas */
+    }
 }
 
 .movie-item {
@@ -102,18 +181,12 @@ button:hover {
     overflow: hidden;
     position: relative;
     box-sizing: border-box;
+    height: 400px; /* Aumentado para dar más espacio al contenido */
 }
 
-.movie-item:hover {
-    font-size: 14px;
-    width: calc(20% - 16px);
-    margin: 0;
-    padding: 0;
-    border-radius: 5px;
-    overflow: hidden;
-    position: relative;
-    box-sizing: border-box;
+#movie-list .movie-item:hover {
     cursor: pointer;
+    filter: brightness(1.25);
 }
 
 .movie-item::before {
@@ -134,8 +207,201 @@ button:hover {
 }
 
 .movie-item-content {
-    position: relative;
+    position: absolute; /* Cambiado a absolute para superponerlo sobre la imagen */
+    bottom: 0; /* Posicionado en la parte inferior */
+    left: 0;
+    right: 0;
     z-index: 2;
     padding: 10px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 50%, transparent 100%); /* Gradiente mejorado */
+    color: #ffffff;
+    height: auto; /* Altura automática para ajustarse al contenido */
+    max-height: 100%; /* Máxima altura igual a la del contenedor */
+    overflow-y: auto; /* Permite desplazamiento si el contenido es muy largo */
 }
 
+.rating-modal {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.80);
+    padding: 20px;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 80%;
+    width: 400px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.rating-modal input[type="range"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 200px;
+    background-color: transparent;
+}
+
+.rating-modal input[type="range"]:focus {
+    outline-color: #f8b195;
+}
+
+.rating-modal input[type="range"]::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    background: rgb(246, 114, 128);
+    background: -webkit-linear-gradient(
+        left,
+        rgba(246, 114, 128, 1) 0%,
+        rgba(192, 108, 132, 1) 50%,
+        rgba(53, 92, 125, 1) 100%
+    );
+    background: linear-gradient(
+        to right,
+        rgba(246, 114, 128, 1) 0%,
+        rgba(192, 108, 132, 1) 50%,
+        rgba(53, 92, 125, 1) 100%
+    );
+}
+
+.rating-modal input[type="range"]::-moz-range-track {
+    -moz-appearance: none;
+    appearance: none;
+    height: 3px;
+    background: rgb(246, 114, 128);
+    background: -moz-linear-gradient(
+        left,
+        rgba(246, 114, 128, 1) 0%,
+        rgba(192, 108, 132, 1) 50%,
+        rgba(53, 92, 125, 1) 100%
+    );
+    background: linear-gradient(
+        to right,
+        rgba(246, 114, 128, 1) 0%,
+        rgba(192, 108, 132, 1) 50%,
+        rgba(53, 92, 125, 1) 100%
+    );
+}
+
+.rating-modal input[type="range"]::-ms-track {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    height: 3px;
+    background: rgb(246, 114, 128);
+    background: -moz-linear-gradient(
+        left,
+        rgba(246, 114, 128, 1) 0%,
+        rgba(192, 108, 132, 1) 50%,
+        rgba(53, 92, 125, 1) 100%
+    );
+    background: -webkit-linear-gradient(
+        left,
+        rgba(246, 114, 128, 1) 0%,
+        rgba(192, 108, 132, 1) 50%,
+        rgba(53, 92, 125, 1) 100%
+    );
+    background: linear-gradient(
+        to right,
+        rgba(246, 114, 128, 1) 0%,
+        rgba(192, 108, 132, 1) 50%,
+        rgba(53, 92, 125, 1) 100%
+    );
+}
+
+.rating-modal input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    border: 2px solid #f8b195;
+    border-radius: 50%;
+    height: 20px;
+    width: 20px;
+    position: relative;
+    bottom: 8px;
+    background: #222
+        url("http://codemenatalie.com/wp-content/uploads/2019/09/slider-thumb.png")
+        center no-repeat;
+    background-size: 50%;
+    box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.4);
+    cursor: grab;
+}
+
+.rating-modal input[type="range"]::-webkit-slider-thumb:active {
+    cursor: grabbing;
+}
+
+.rating-modal input[type="range"]::-moz-range-thumb {
+    -moz-appearance: none;
+    appearance: none;
+    border: 2px solid #f8b195;
+    border-radius: 50%;
+    height: 20px;
+    width: 20px;
+    position: relative;
+    bottom: 8px;
+    background: #222
+        url("http://codemenatalie.com/wp-content/uploads/2019/09/slider-thumb.png")
+        center no-repeat;
+    background-size: 50%;
+    box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.4);
+    cursor: grab;
+}
+
+.rating-modal input[type="range"]::-moz-range-thumb:active {
+    cursor: grabbing;
+}
+
+.rating-modal input[type="range"]::-ms-thumb {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: 2px solid #f8b195;
+    border-radius: 50%;
+    height: 20px;
+    width: 20px;
+    position: relative;
+    bottom: 8px;
+    background: #222
+        url("http://codemenatalie.com/wp-content/uploads/2019/09/slider-thumb.png")
+        center no-repeat;
+    background-size: 50%;
+    box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.4);
+    cursor: grab;
+}
+
+.rating-modal input[type="range"]::-ms-thumb:active {
+    cursor: grabbing;
+}
+
+.rating-modal button {
+    margin-top: 10px;
+    padding: 10px 20px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 26px;
+    color: #808080;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    filter: brightness(1.25);
+}
