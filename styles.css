@@ -16,18 +16,27 @@ body {
 .movie-item {
     margin-bottom: 15px;
     padding: 10px;
-    background-color: #fff;
+    background-color: #f4f4f4;
     border: 1px solid #ddd;
 }
 
 button {
     padding: 10px 20px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
+    background-color: #f4f4f4;
+    border: 1px solid #404040;
     cursor: pointer;
+    border-radius: 100px;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #404040;
+    color: #f4f4f4;
+}
+
+h3 {
+    color: #808080; /* Gris al 75% */
+}
+
+h2 {
+    color: #404040; /* Gris al 25% */
 }
