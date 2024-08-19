@@ -21,9 +21,12 @@
 }
 
 @media (max-width: 450px) {
-    .movie-item,
-    #movie-list .movie-item {
+    .movie-item {
         width: 100%;
+    }
+    
+    #movie-list .movie-item {
+        width: calc(33.33% - 6.67px);
     }
 }
 
@@ -58,7 +61,7 @@ button {
     margin: 10px;
     padding: 10px 20px;
     color: #f4f4f4;
-    background-color: #000000;
+    background-color: transparent;
     border: 1px solid #f4f4f4;
     cursor: pointer;
     border-radius: 25px;
@@ -95,8 +98,8 @@ button:hover {
     margin: 0;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 20px;
+    justify-content: flex-start;
+    gap: 10px;
 }
 
 #rated-movies {
@@ -118,7 +121,7 @@ button:hover {
 }
 
 #rated-movies .movie-item::before {
-    background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent); /* Aumentada la opacidad */
+    background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.25)); /* Aumentada la opacidad */
 }
 
 #rated-movies .movie-item img {
@@ -184,6 +187,12 @@ button:hover {
     height: 400px; /* Aumentado para dar más espacio al contenido */
 }
 
+@media (max-width: 600px) {
+    #movie-list .movie-item {
+        height: 300px;
+    }
+}
+
 #movie-list .movie-item:hover {
     cursor: pointer;
     filter: brightness(1.25);
@@ -239,13 +248,29 @@ button:hover {
     background-color: #1a1a1a;
     padding: 20px;
     border-radius: 10px;
-    max-width: 80%;
-    width: 400px;
+    width: 90%; /* Cambiado de width fijo a porcentaje */
+    max-width: 400px; /* Mantenemos un ancho máximo */
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    margin: 0 auto; /* Centrar horizontalmente */
+    overflow-y: auto; /* Permitir scroll vertical si el contenido es muy largo */
+    max-height: 90vh; /* Altura máxima del 90% del viewport */
+}
+
+/* Añadimos media queries para ajustar el padding en pantallas más pequeñas */
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 320px) {
+    .modal-content {
+        padding: 10px;
+    }
 }
 
 .rating-modal input[type="range"] {
@@ -257,25 +282,25 @@ button:hover {
 }
 
 .rating-modal input[type="range"]:focus {
-    outline-color: #f8b195;
+    outline-color: #B38728;
 }
 
 .rating-modal input[type="range"]::-webkit-slider-runnable-track {
     -webkit-appearance: none;
     appearance: none;
     height: 3px;
-    background: rgb(246, 114, 128);
+    background: #FBF5B7;
     background: -webkit-linear-gradient(
         left,
-        rgba(246, 114, 128, 1) 0%,
-        rgba(192, 108, 132, 1) 50%,
-        rgba(53, 92, 125, 1) 100%
+        #BF953F 0%,
+        #FCF6BA 50%,
+        #AA771C 100%
     );
     background: linear-gradient(
         to right,
-        rgba(246, 114, 128, 1) 0%,
-        rgba(192, 108, 132, 1) 50%,
-        rgba(53, 92, 125, 1) 100%
+        #BF953F 0%,
+        #FCF6BA 50%,
+        #AA771C 100%
     );
 }
 
@@ -283,18 +308,18 @@ button:hover {
     -moz-appearance: none;
     appearance: none;
     height: 3px;
-    background: rgb(246, 114, 128);
+    background: #FCF6BA;
     background: -moz-linear-gradient(
         left,
-        rgba(246, 114, 128, 1) 0%,
-        rgba(192, 108, 132, 1) 50%,
-        rgba(53, 92, 125, 1) 100%
+        #BF953F 0%,
+        #FCF6BA 50%,
+        #AA771C 100%
     );
     background: linear-gradient(
         to right,
-        rgba(246, 114, 128, 1) 0%,
-        rgba(192, 108, 132, 1) 50%,
-        rgba(53, 92, 125, 1) 100%
+        #BF953F 0%,
+        #FCF6BA 50%,
+        #AA771C 100%
     );
 }
 
@@ -303,31 +328,31 @@ button:hover {
     -moz-appearance: none;
     appearance: none;
     height: 3px;
-    background: rgb(246, 114, 128);
+    background: #FCF6BA;
     background: -moz-linear-gradient(
         left,
-        rgba(246, 114, 128, 1) 0%,
-        rgba(192, 108, 132, 1) 50%,
-        rgba(53, 92, 125, 1) 100%
+        #BF953F 0%,
+        #FCF6BA 50%,
+        #AA771C 100%
     );
     background: -webkit-linear-gradient(
         left,
-        rgba(246, 114, 128, 1) 0%,
-        rgba(192, 108, 132, 1) 50%,
-        rgba(53, 92, 125, 1) 100%
+        #BF953F 0%,
+        #FCF6BA 50%,
+        #AA771C 100%
     );
     background: linear-gradient(
         to right,
-        rgba(246, 114, 128, 1) 0%,
-        rgba(192, 108, 132, 1) 50%,
-        rgba(53, 92, 125, 1) 100%
+        #BF953F 0%,
+        #FCF6BA 50%,
+        #AA771C 100%
     );
 }
 
 .rating-modal input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    border: 2px solid #f8b195;
+    border: 2px solid #B38728;
     border-radius: 50%;
     height: 20px;
     width: 20px;
@@ -348,7 +373,7 @@ button:hover {
 .rating-modal input[type="range"]::-moz-range-thumb {
     -moz-appearance: none;
     appearance: none;
-    border: 2px solid #f8b195;
+    border: 2px solid #B38728;
     border-radius: 50%;
     height: 20px;
     width: 20px;
@@ -370,7 +395,7 @@ button:hover {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    border: 2px solid #f8b195;
+    border: 2px solid #B38728;
     border-radius: 50%;
     height: 20px;
     width: 20px;
@@ -404,4 +429,18 @@ button:hover {
 
 .close-btn:hover {
     filter: brightness(1.25);
+}
+
+* {
+    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+}
+
+*::-webkit-scrollbar {
+    display: none;  /* WebKit */
+}
+
+/* Añade esta nueva regla al final del archivo */
+body.modal-open {
+    overflow: hidden;
 }

@@ -47,34 +47,49 @@ function rateMovie(movieId, title, posterPath) {
                 <img src="${posterPath ? IMAGE_BASE_URL + posterPath : 'placeholder.jpg'}" alt="${title} poster" class="movie-poster">
                 <h2>${title}</h2>
                 <input type="range" min="0" max="10" value="5" step="0.5" id="rating-slider">
-                <p>Tu valoración es de <span id="rating-value">5</span> / 10</p>
-                <button id="submit-rating">Enviar</button>
+                <p><span id="rating-value">5</span> / 10</p>
+                <button id="submit-rating">Valorar</button>
             </div>
         </div>
     `;
+    
+    // Agregar el modal al DOM
     document.body.appendChild(modal);
 
+    // Obtener referencias a los elementos del modal
+    const slider = modal.querySelector('#rating-slider');
+    const ratingValue = modal.querySelector('#rating-value');
+    const submitButton = modal.querySelector('#submit-rating');
+    const closeButton = modal.querySelector('.close-btn');
+
+    // Verificar si todos los elementos necesarios existen
+    if (!slider || !ratingValue || !submitButton || !closeButton) {
+        console.error('No se pudieron encontrar todos los elementos necesarios en el modal');
+        return;
+    }
+
     // Actualizar el valor mostrado cuando se mueve el slider
-    const slider = document.getElementById('rating-slider');
-    const ratingValue = document.getElementById('rating-value');
     slider.addEventListener('input', () => {
         ratingValue.textContent = slider.value;
     });
 
     // Manejar el envío de la valoración
-    document.getElementById('submit-rating').addEventListener('click', () => {
+    submitButton.addEventListener('click', () => {
         const rating = parseFloat(slider.value);
+        const ratingDate = new Date().toISOString(); // Guardar la fecha y hora actual
         fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`)
             .then(response => response.json())
             .then(data => {
+                const year = data.release_date ? data.release_date.split('-')[0] : 'N/A';
                 userRatings.push({
                     movieId,
                     title,
-                    year: data.release_date ? data.release_date.split('-')[0] : 'N/A',
+                    year: year,
                     rating: rating,
                     genre: data.genres && data.genres.length > 0 ? data.genres[0].name : 'Desconocido',
                     tmdbRating: data.vote_average ? parseFloat(data.vote_average) : 0,
-                    posterPath: data.poster_path
+                    posterPath: data.poster_path,
+                    ratingDate: ratingDate // Añadir la fecha y hora de la valoración
                 });
                 saveRatings();
                 calculateStats();
@@ -88,7 +103,7 @@ function rateMovie(movieId, title, posterPath) {
     });
 
     // Manejar el cierre del modal
-    document.querySelector('.close-btn').addEventListener('click', () => {
+    closeButton.addEventListener('click', () => {
         document.body.removeChild(modal);
     });
 }
@@ -148,7 +163,10 @@ function displayRatedMovies() {
     const ratedMoviesContainer = document.getElementById('rated-movies');
     ratedMoviesContainer.innerHTML = ''; // Limpiar el contenedor antes de agregar nuevas valoraciones
 
-    userRatings.forEach((rating, index) => {
+    // Ordenar userRatings en orden inverso (más recientes primero)
+    const sortedRatings = [...userRatings].sort((a, b) => new Date(b.ratingDate) - new Date(a.ratingDate));
+
+    sortedRatings.forEach((rating, index) => {
         const movieItem = document.createElement('div');
         movieItem.className = 'movie-item';
         movieItem.innerHTML = `
@@ -157,16 +175,29 @@ function displayRatedMovies() {
                 <h2>${rating.title}</h2>
                 <p>Año: ${rating.year}<br>Género: ${rating.genre}<br>Calificación TMDb: ${rating.tmdbRating}/10</p>
                 <h3>Tu valoración: ${rating.rating}/10</h3>
-                <button onclick="editRating(${index})">Editar</button>
-                <button onclick="deleteRating(${index})">Eliminar</button>
+                <p>Valorada el: ${new Date(rating.ratingDate).toLocaleString()}</p>
+                <button class="edit-button">Editar</button>
+                <button class="delete-button">Eliminar</button>
             </div>
         `;
+        
+        const editButton = movieItem.querySelector('.edit-button');
+        const deleteButton = movieItem.querySelector('.delete-button');
+        
+        editButton.addEventListener('click', () => editRating(rating.movieId));
+        deleteButton.addEventListener('click', () => deleteRating(rating.movieId));
+        
         ratedMoviesContainer.appendChild(movieItem);
     });
 }
 
-function editRating(index) {
-    const rating = userRatings[index];
+function editRating(movieId) {
+    const ratingIndex = userRatings.findIndex(r => r.movieId === movieId);
+    if (ratingIndex === -1) {
+        console.error('No se encontró la película con ID:', movieId);
+        return;
+    }
+    const rating = userRatings[ratingIndex];
     
     // Crear el modal
     const modal = document.createElement('div');
@@ -174,25 +205,27 @@ function editRating(index) {
     modal.innerHTML = `
         <div class="modal-content">
             <span class="close-btn">&times;</span>
-            <h2>Edita la valoración de ${rating.title}</h2>
-            <input type="range" min="0" max="10" value="${rating.rating}" step="0.5" id="rating-slider">
-            <p>Tu valoración ahora es <span id="rating-value">${rating.rating}</span></p>
-            <button id="submit-rating">Guardar</button>
+            <h4>Edita la valoración de</h4>
+            <h2>${rating.title}</h2>
+            <input type="range" min="0" max="10" value="${rating.rating}" step="0.5" id="edit-rating-slider">
+            <p>Tu valoración ahora es <span id="edit-rating-value">${rating.rating}</span></p>
+            <button id="edit-submit-rating">Guardar</button>
         </div>
     `;
     document.body.appendChild(modal);
 
     // Actualizar el valor mostrado cuando se mueve el slider
-    const slider = document.getElementById('rating-slider');
-    const ratingValue = document.getElementById('rating-value');
+    const slider = modal.querySelector('#edit-rating-slider');
+    const ratingValue = modal.querySelector('#edit-rating-value');
     slider.addEventListener('input', () => {
         ratingValue.textContent = slider.value;
     });
 
     // Manejar el envío de la valoración
-    document.getElementById('submit-rating').addEventListener('click', () => {
+    modal.querySelector('#edit-submit-rating').addEventListener('click', () => {
         const newRating = parseFloat(slider.value);
-        userRatings[index].rating = newRating;
+        userRatings[ratingIndex].rating = newRating;
+        userRatings[ratingIndex].ratingDate = new Date().toISOString(); // Actualizar la fecha de valoración
         saveRatings();
         calculateStats();
         displayRatedMovies();
@@ -200,14 +233,19 @@ function editRating(index) {
     });
 
     // Manejar el cierre del modal
-    document.querySelector('.close-btn').addEventListener('click', () => {
+    modal.querySelector('.close-btn').addEventListener('click', () => {
         document.body.removeChild(modal);
     });
 }
 
-function deleteRating(index) {
+function deleteRating(movieId) {
+    const ratingIndex = userRatings.findIndex(r => r.movieId === movieId);
+    if (ratingIndex === -1) {
+        console.error('No se encontró la película con ID:', movieId);
+        return;
+    }
     if (confirm('¿Estás seguro de que quieres eliminar esta valoración?')) {
-        userRatings.splice(index, 1);
+        userRatings.splice(ratingIndex, 1);
         saveRatings();
         calculateStats();
         displayRatedMovies();
