@@ -26,9 +26,10 @@ function displayMovies(movies) {
         const movieItem = document.createElement('div');
         movieItem.className = 'movie-item';
         movieItem.innerHTML = `
-            <img src="${movie.poster_path ? IMAGE_BASE_URL + movie.poster_path : 'placeholder.jpg'}" alt="${movie.title} poster">
-            <h3>${movie.title} (${movie.release_date.split('-')[0]})</h3>
-            <button onclick="rateMovie(${movie.id}, '${movie.title}')">Valorar</button>
+            <img src="${movie.poster_path ? IMAGE_BASE_URL + movie.poster_path : 'placeholder.jpg'}" 
+                 alt="${movie.title} poster" 
+                 title="${movie.title} (${movie.release_date.split('-')[0]})"
+                 onclick="rateMovie(${movie.id}, '${movie.title}')">
         `;
         movieList.appendChild(movieItem);
     });
@@ -116,11 +117,13 @@ function displayRatedMovies() {
         movieItem.className = 'movie-item';
         movieItem.innerHTML = `
             <img src="${rating.posterPath ? IMAGE_BASE_URL + rating.posterPath : 'placeholder.jpg'}" alt="${rating.title} poster">
-            <h3>${rating.title} (${rating.year}) - Tu valoración: ${rating.rating}/10</h3>
-            <p>Género: ${rating.genre}</p>
-            <p>Calificación TMDb: ${rating.tmdbRating}/10</p>
-            <button onclick="editRating(${index})">Editar</button>
-            <button onclick="deleteRating(${index})">Eliminar</button>
+            <div class="movie-item-content">
+                <h3>${rating.title} (${rating.year}) - Tu valoración: ${rating.rating}/10</h3>
+                <p>Género: ${rating.genre}</p>
+                <p>Calificación TMDb: ${rating.tmdbRating}/10</p>
+                <button onclick="editRating(${index})">Editar</button>
+                <button onclick="deleteRating(${index})">Eliminar</button>
+            </div>
         `;
         ratedMoviesContainer.appendChild(movieItem);
     });
@@ -150,3 +153,5 @@ document.addEventListener('DOMContentLoaded', function() {
     loadRatings();
     displayRatedMovies(); // Mostrar las películas valoradas al cargar la página
 });
+
+movieElement.style.backgroundImage = `url(${movie.Poster})`;
