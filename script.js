@@ -45,7 +45,9 @@ function rateMovie(movieId, title) {
                     genre: data.genres[0]?.name || 'Desconocido',
                     tmdbRating: parseFloat(data.vote_average)
                 });
-                calculateStats();
+                saveRatings();  // Guardar en Local Storage
+                calculateStats(); // Recalcular estadísticas
+                displayRatedMovies(); // Mostrar películas valoradas
             });
     }
 }
@@ -85,3 +87,39 @@ function calculateStats() {
     const averageDeviation = totalDeviation / userRatings.length;
     document.getElementById('rating-deviation').textContent = `Desviación media con TMDb: ${averageDeviation.toFixed(1)}`;
 }
+
+// Guardar valoraciones en Local Storage
+function saveRatings() {
+    localStorage.setItem('userRatings', JSON.stringify(userRatings));
+}
+
+// Cargar valoraciones de Local Storage
+function loadRatings() {
+    const storedRatings = localStorage.getItem('userRatings');
+    if (storedRatings) {
+        userRatings = JSON.parse(storedRatings);
+        calculateStats(); // Recalcular estadísticas
+        displayRatedMovies(); // Mostrar películas valoradas
+    }
+}
+
+function displayRatedMovies() {
+    const ratedMoviesContainer = document.getElementById('rated-movies');
+    ratedMoviesContainer.innerHTML = ''; // Limpiar el contenedor antes de agregar nuevas valoraciones
+
+    userRatings.forEach(rating => {
+        const movieItem = document.createElement('div');
+        movieItem.className = 'movie-item';
+        movieItem.innerHTML = `
+            <h3>${rating.title} - Tu valoración: ${rating.rating}/10</h3>
+            <p>Género: ${rating.genre}</p>
+            <p>Calificación TMDb: ${rating.tmdbRating}/10</p>
+        `;
+        ratedMoviesContainer.appendChild(movieItem);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadRatings();
+    displayRatedMovies(); // Mostrar las películas valoradas al cargar la página
+});
