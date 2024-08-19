@@ -1,5 +1,6 @@
 const API_KEY = '5bda5df823bd8aa847a7a80ae2a56f40';
 const BASE_URL = 'https://api.themoviedb.org/3';
+const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w200'; // URL base para las imágenes
 
 // Búsqueda de películas en TMDb
 document.getElementById('search-button').addEventListener('click', function() {
@@ -25,6 +26,7 @@ function displayMovies(movies) {
         const movieItem = document.createElement('div');
         movieItem.className = 'movie-item';
         movieItem.innerHTML = `
+            <img src="${movie.poster_path ? IMAGE_BASE_URL + movie.poster_path : 'placeholder.jpg'}" alt="${movie.title} poster">
             <h3>${movie.title} (${movie.release_date.split('-')[0]})</h3>
             <button onclick="rateMovie(${movie.id}, '${movie.title}')">Valorar</button>
         `;
@@ -44,7 +46,8 @@ function rateMovie(movieId, title) {
                     year: data.release_date.split('-')[0], // Añadimos el año
                     rating: parseInt(rating),
                     genre: data.genres[0]?.name || 'Desconocido',
-                    tmdbRating: parseFloat(data.vote_average)
+                    tmdbRating: parseFloat(data.vote_average),
+                    posterPath: data.poster_path // Añadimos el poster_path
                 });
                 saveRatings();
                 calculateStats();
@@ -112,6 +115,7 @@ function displayRatedMovies() {
         const movieItem = document.createElement('div');
         movieItem.className = 'movie-item';
         movieItem.innerHTML = `
+            <img src="${rating.posterPath ? IMAGE_BASE_URL + rating.posterPath : 'placeholder.jpg'}" alt="${rating.title} poster">
             <h3>${rating.title} (${rating.year}) - Tu valoración: ${rating.rating}/10</h3>
             <p>Género: ${rating.genre}</p>
             <p>Calificación TMDb: ${rating.tmdbRating}/10</p>
